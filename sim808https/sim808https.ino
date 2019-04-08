@@ -132,6 +132,7 @@ void loop() {
 
   Serial.println(SIM808.readString());
   String str = "AT+HTTPPARA=\"URL\",\"https://api.mapid.io/api/update?key=242cc4f809146df922c21b3aadcafb2e&var1="+latitude+"&var2="+longitude+"&var3="+altitude+"\"";
+  
   SIM808.println(str);// setting the httppara,
   //the second parameter is the website from where you want to access data
   delay(d);

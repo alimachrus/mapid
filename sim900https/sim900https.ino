@@ -6,6 +6,8 @@ float latitude = -7.0599;
 float longitude = 109.4259;
 int d=500;
 
+int coba=99;
+
 void setup()
 {
   Serial.begin(9600);
@@ -49,9 +51,9 @@ void sendingdata()
   delay(d);
   ShowSerialData();
   
-  String str = "AT+HTTPPARA=\"URL\",\"api.mapid.io/api/update?key=5466bc74e301a58c0ec4ad65aa0d8bbb&var1="+String(latitude)
+  String str = "AT+HTTPPARA=\"URL\",\"api.mapid.io/api/update?key=a96e7b31dc53765cd671653cbc34a38d&var1="+String(latitude)
   +"&var2="+String(longitude)
-  +"&var3="+String(temp)+"\"";
+  +"&var3="+String(coba)+"\"";
   
   mySerial.println(str);
   ShowSerialData();

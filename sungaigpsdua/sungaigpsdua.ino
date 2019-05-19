@@ -1,17 +1,99 @@
 #include <SoftwareSerial.h>
-#define DEBUG true
 SoftwareSerial mySerial(7, 8);
 String data[7], latitude, longitude, altitud, timegps, speedknot, c, state, com;
-int d=500;
-float value=13.7575;
+int d = 2000;
 
-void setup() {
+float DistanceMax;
+float DistanceMin;
+
+bool NotAccurate = true;
+
+#define trig_pin     3   // pin TRIG to D1
+#define echo_pin     2   // pin ECHO to D2
+
+// defines variables
+float duration;
+float distance;
+//float next = 250;
+//float value;
+//float ema = 0.2;
+
+float AnalogWert;
+float Powerwert;
+
+void setup()
+{
+  pinMode(trig_pin, OUTPUT);
+  pinMode(echo_pin, INPUT);
   Serial.begin(9600);
   mySerial.begin(9600);
-  delay(5);
+}
+
+float  getDistance() {
+  digitalWrite(trig_pin, LOW);
+  delayMicroseconds(2);
+  digitalWrite(trig_pin, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trig_pin, LOW);
+  duration = pulseIn(echo_pin, HIGH);
+  //  distance = (duration / 2) / 29.1;
+  distance = (duration / 2) / 28.1;
+  return distance;
 }
 
 void loop() {
+
+  do {
+
+    getDistance();
+    while (getDistance() >= 500 || getDistance() <=  20) {
+      //data is not in range
+      getDistance();
+    }
+    //Now the data is in range, we need to save the data values and compare it. Only once.
+    //If it's bad, then try it all again.
+    DistanceMax = (getDistance() + 30);
+    DistanceMin = (getDistance() - 30);
+
+    getDistance();
+
+    while (getDistance() >= 500 || getDistance() <=  20) {
+      //data is not in range
+      getDistance();
+    }
+
+    if (getDistance() > DistanceMax || getDistance() < DistanceMin) {
+      //our data is bad
+      NotAccurate = true;
+    }
+    else {
+      //our data is good
+      NotAccurate = false;
+    }
+
+  } while (NotAccurate);
+
+  //  next = getDistance();
+  //  nilai= getValue();
+  //  value = (ema * next) + ((1 - ema) * value);
+
+  AnalogWert = analogRead(A0);
+  Powerwert = AnalogWert * (27.24 / 1023); //in case of higher voltage, change the code: powerwert = AnalogWert *(x/1023); x= your new power supply maximum voltage
+
+  Serial.print("Distance: ");
+  Serial.print(getDistance(), 0);
+  Serial.print(" cm");
+  Serial.print("\t");
+  Serial.println(AnalogWert);
+
+  sendingdata();
+  NotAccurate = true;
+
+  delay(100000-60000);
+}
+
+void sendingdata()
+{
   mySerial.println("AT");
   delay(d);
 
@@ -132,7 +214,11 @@ void loop() {
   delay(d*3);
   Serial.println(mySerial.readString());
   
-  String str = "AT+HTTPPARA=\"URL\",\"https://api.mapid.io/api/update?key=a96e7b31dc53765cd671653cbc34a38d&var1="+latitude+"&var2="+longitude+"&var3="+String(value, 4)+"\"";
+  String str = "AT+HTTPPARA=\"URL\",\"api.mapid.io/api/update?key=98eb19afeab734a3c2ed1db68f1e670c&var1=" + latitude
+               + "&var2=" + longitude
+               + "&var3=" + String(getDistance(),2)
+               + "&var4=" + String(AnalogWert)
+               + "\"";
   
   mySerial.println(str);// setting the httppara,
   //the second parameter is the website from where you want to access data

@@ -28,7 +28,7 @@ const char* host = "api.mapid.io";
 const int httpsPort = 443;
 
 double lat = -7;
-double lon;
+double lon = 169.88;
 int potPin = A0;
 int val = 0;
 
@@ -57,7 +57,6 @@ void setup() {
 
 void loop() {
   val = analogRead(potPin);
-  lon = 106.9125 + (112.0755 - 106.9125) * val / (598 - 8);
   
   Serial.print("connecting to ");
   Serial.println(host);
